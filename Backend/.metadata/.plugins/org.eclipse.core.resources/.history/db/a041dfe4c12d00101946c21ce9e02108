@@ -1,0 +1,33 @@
+package com.backend.controller;
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import com.backend.model.User;
+import com.backend.repository.UserRepository;
+
+@RestController
+@RequestMapping("/api")
+public class AuthController {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @PostMapping("/signup")
+    public String signup(@RequestBody User user) {
+        if (userRepository.existsByEmail(user.getEmail())) {
+            return "Email already exists";
+        }
+        userRepository.save(user);
+        return "User registered successfully";
+    }
+//    @PostMapping("/login")
+//    public ResponseEntity<?> login(@RequestBody User loginRequest) {
+//        return UserRepository.findByEmail(loginRequest.getEmail())
+//                .filter(user -> user.getPassword().equals(loginRequest.getPassword()))
+//                .map(user -> ResponseEntity.ok("{\"message\": \"Login successful\"}"))
+//                .orElse(ResponseEntity.status(401).body("{\"message\": \"Invalid credentials\"}"));
+//    }
+}

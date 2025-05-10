@@ -1,0 +1,37 @@
+package com.backend.controller;
+
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import com.backend.model.User;
+import com.backend.repository.UserRepository;
+
+@RestController
+@RequestMapping("/api/user")
+@CrossOrigin(origins = "http://localhost:5173") // adjust if your frontend is on a different port
+public class AuthController {
+
+    private final UserRepository userRepo;
+
+    public AuthController(UserRepository userRepo) {
+        this.userRepo = userRepo;
+    }
+
+    @PostMapping("/signup")
+    public ResponseEntity<?> register(@RequestBody User user) {
+        if (userRepo.existsByEmail(user.getEmail())) {
+            return ResponseEntity.badRequest().body("{\"message\": \"Email already in use\"}");
+        }
+        userRepo.save(user);
+        return ResponseEntity.ok("{\"message\": \"Signup successful\"}");
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody User loginRequest) {
+        return userRepo.findByEmail(loginRequest.getEmail())
+                .filter(user -> user.getPassword().equals(loginRequest.getPassword()))
+                .map(user -> ResponseEntity.ok("{\"message\": \"Login successful\"}"))
+                .orElse(ResponseEntity.status(401).body("{\"message\": \"Invalid credentials\"}"));
+    }
+}
